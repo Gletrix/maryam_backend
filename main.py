@@ -24,7 +24,7 @@ from schemas import (
     ContactInfoUpdate, ContactInfoResponse,
     ErrorResponse
 )
-from auth import verify_owner_password, create_access_token, get_current_user
+from auth import verify_owner_password, create_access_token, get_current_user, get_optional_user
 from crud import (
     create_post, get_post, get_posts, update_post, delete_post,
     create_contact_message, get_contact_info, update_contact_info
