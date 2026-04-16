@@ -123,7 +123,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     """
     if not credentials:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication required",
             headers={"WWW-Authenticate": "Bearer"},
         )
