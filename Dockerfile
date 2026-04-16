@@ -1,5 +1,5 @@
 # Backend Dockerfile for Portfolio WebApp
-# Deploy to Railway: Set DATABASE_URL, OWNER_PASSWORD, SECRET_KEY, FRONTEND_ORIGIN, MEDIA_STORAGE
+# Deploy to Railway: Set DATABASE_URL, OWNER_PASSWORD, JWT_SECRET (or SECRET_KEY), MEDIA_STORAGE
 
 FROM python:3.11-slim
 

@@ -1,5 +1,5 @@
 # Main FastAPI application - Portfolio WebApp Backend
-# Deploy to Railway: Set DATABASE_URL, OWNER_PASSWORD, SECRET_KEY, FRONTEND_ORIGIN, MEDIA_STORAGE
+# Deploy to Railway: Set DATABASE_URL, OWNER_PASSWORD, JWT_SECRET (or SECRET_KEY), MEDIA_STORAGE
 # Start command: uvicorn main:app --host 0.0.0.0 --port $PORT
 
 import os
@@ -35,8 +35,8 @@ from media_handler import process_media_upload, get_media_response_data, MEDIA_S
 # Railway environment variables
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://user:pass@localhost/portfolio")
 OWNER_PASSWORD = os.getenv("OWNER_PASSWORD", "change-me-in-production")
-SECRET_KEY = os.getenv("SECRET_KEY", "change-me-in-production")
-FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:3000")
+JWT_SECRET = os.getenv("JWT_SECRET") or os.getenv("SECRET_KEY", "change-me-in-production")
+SECRET_KEY = JWT_SECRET  # Backward compatibility for tests and older configs
 MEDIA_STORAGE_MODE = os.getenv("MEDIA_STORAGE", "filesystem")
 
 # Convert postgres:// to postgresql+asyncpg:// for SQLAlchemy
@@ -90,11 +90,11 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS - Only allow frontend origin
+# CORS - Allow browser clients from any origin (JWT auth uses Authorization header, not cookies)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_ORIGIN],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
