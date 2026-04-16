@@ -6,7 +6,7 @@ import os
 import base64
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -24,10 +24,10 @@ from schemas import (
     ContactInfoUpdate, ContactInfoResponse,
     ErrorResponse
 )
-from auth import verify_owner_password, create_access_token, get_current_user, get_optional_user
+from auth import verify_owner_password, create_access_token, get_current_user
 from crud import (
     create_post, get_post, get_posts, update_post, delete_post,
-    create_contact_message, get_contact_info, update_contact_info
+    create_contact_message, get_contact_info, update_contact_info, get_contact_messages
 )
 from media_handler import process_media_upload, get_media_response_data, MEDIA_STORAGE, MEDIA_DIR
 
@@ -165,11 +165,11 @@ async def list_posts(
     page: int = 1,
     page_size: int = 12,
     db: AsyncSession = Depends(get_db),
-    current_user: Optional[dict] = Depends(get_optional_user)
+    current_user: Optional[dict] = Depends(get_current_user)
 ):
     """
     Get paginated list of posts.
-    Public endpoint - visitors see published posts only.
+    Public endpoint - only shows published posts.
     Owner sees all posts including drafts when authenticated.
     """
     include_drafts = current_user is not None
@@ -256,6 +256,19 @@ async def get_contact_information(db: AsyncSession = Depends(get_db)):
     """
     info = await get_contact_info(db)
     return info
+
+
+@app.get("/contact-messages", response_model=List[ContactMessageResponse])
+async def list_contact_messages(
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Get all contact messages for the owner dashboard.
+    Owner-only endpoint.
+    """
+    messages = await get_contact_messages(db)
+    return messages
 
 
 @app.put("/contact-info", response_model=ContactInfoResponse)
