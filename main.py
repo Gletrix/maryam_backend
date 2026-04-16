@@ -12,7 +12,6 @@ from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, F
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.pool import NullPool
 
@@ -78,11 +77,9 @@ async def get_db() -> AsyncSession:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan - create tables on startup."""
-    # Startup: Create tables and keep existing deployments compatible.
+    # Startup: Create tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-        await conn.execute(text("ALTER TABLE posts ADD COLUMN IF NOT EXISTS media_width INTEGER"))
-        await conn.execute(text("ALTER TABLE posts ADD COLUMN IF NOT EXISTS media_height INTEGER"))
     yield
     # Shutdown: Cleanup
     await engine.dispose()
@@ -133,8 +130,6 @@ async def authenticate_owner(auth_data: AuthRequest, request: Request):
 async def create_new_post(
     title: str = Form(..., min_length=1, max_length=255),
     description: Optional[str] = Form(None),
-    media_width: Optional[int] = Form(None),
-    media_height: Optional[int] = Form(None),
     is_draft: bool = Form(False),
     media: Optional[UploadFile] = File(None),
     current_user: dict = Depends(get_current_user),
@@ -145,7 +140,7 @@ async def create_new_post(
     Supports text-only posts or posts with image/video media.
     Media is processed and thumbnail generated automatically.
     """
-    post_data = PostCreate(title=title, description=description, media_width=media_width, media_height=media_height, is_draft=is_draft)
+    post_data = PostCreate(title=title, description=description, is_draft=is_draft)
     
     # Process media if provided
     media_type = None
@@ -170,11 +165,11 @@ async def list_posts(
     page: int = 1,
     page_size: int = 12,
     db: AsyncSession = Depends(get_db),
-    current_user: Optional[dict] = Depends(get_current_user)
+    current_user: Optional[dict] = Depends(get_optional_user)
 ):
     """
     Get paginated list of posts.
-    Public endpoint - only shows published posts.
+    Public endpoint - visitors see published posts only.
     Owner sees all posts including drafts when authenticated.
     """
     include_drafts = current_user is not None
