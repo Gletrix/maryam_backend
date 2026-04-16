@@ -39,7 +39,7 @@ JWT_SECRET = os.getenv("JWT_SECRET") or os.getenv("SECRET_KEY", "change-me-in-pr
 SECRET_KEY = JWT_SECRET  # Backward compatibility for tests and older configs
 MEDIA_STORAGE_MODE = os.getenv("MEDIA_STORAGE", "filesystem")
 
-# Convert common PostgreSQL URLs to asyncpg for SQLAlchemy async engine
+# Normalize Railway/Postgres URLs to an async driver for SQLAlchemy
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
 elif DATABASE_URL.startswith("postgresql://"):
