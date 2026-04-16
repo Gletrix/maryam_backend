@@ -27,7 +27,8 @@ from schemas import (
 from auth import verify_owner_password, create_access_token, get_current_user
 from crud import (
     create_post, get_post, get_posts, update_post, delete_post,
-    create_contact_message, get_contact_info, update_contact_info, get_contact_messages
+    create_contact_message, get_contact_info, update_contact_info, get_contact_messages,
+    get_contact_message, delete_contact_message
 )
 from media_handler import process_media_upload, get_media_response_data, MEDIA_STORAGE, MEDIA_DIR
 
@@ -261,7 +262,7 @@ async def get_contact_information(db: AsyncSession = Depends(get_db)):
 @app.get("/contact-messages", response_model=List[ContactMessageResponse])
 async def list_contact_messages(
     page: int = 1,
-    page_size: int = 50,
+    page_size: int = 500,
     current_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
@@ -271,6 +272,23 @@ async def list_contact_messages(
     """
     messages, _total = await get_contact_messages(db, page=page, page_size=page_size)
     return messages
+
+
+@app.delete("/contact-messages/{message_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def remove_contact_message(
+    message_id: int,
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Delete a contact message from the inbox.
+    Owner-only endpoint.
+    """
+    message = await get_contact_message(db, message_id)
+    if message is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact message not found")
+    await delete_contact_message(db, message)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @app.put("/contact-info", response_model=ContactInfoResponse)

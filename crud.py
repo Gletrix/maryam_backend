@@ -150,6 +150,20 @@ async def get_contact_messages(
     return list(messages), total
 
 
+async def get_contact_message(db: AsyncSession, message_id: int) -> Optional[ContactMessage]:
+    """Get a single contact message by ID."""
+    result = await db.execute(
+        select(ContactMessage).where(ContactMessage.id == message_id)
+    )
+    return result.scalar_one_or_none()
+
+
+async def delete_contact_message(db: AsyncSession, message: ContactMessage) -> None:
+    """Delete a contact message from the database."""
+    await db.delete(message)
+    await db.commit()
+
+
 # ==================== CONTACT INFO CRUD ====================
 
 async def get_contact_info(db: AsyncSession) -> ContactInfo:
