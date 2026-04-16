@@ -30,6 +30,8 @@ class PostBase(BaseModel):
     """Base post schema with common fields."""
     title: str = Field(..., min_length=1, max_length=255)
     description: Optional[str] = None
+    media_width: Optional[int] = Field(None, gt=0, description='Custom display width in pixels')
+    media_height: Optional[int] = Field(None, gt=0, description='Custom display height in pixels')
     is_draft: bool = False
 
 
@@ -42,6 +44,8 @@ class PostUpdate(BaseModel):
     """Schema for updating an existing post."""
     title: Optional[str] = Field(None, min_length=1, max_length=255)
     description: Optional[str] = None
+    media_width: Optional[int] = Field(None, gt=0)
+    media_height: Optional[int] = Field(None, gt=0)
     is_draft: Optional[bool] = None
 
 

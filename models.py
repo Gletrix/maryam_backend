@@ -18,6 +18,8 @@ class Post(Base):
     media_path = Column(String(500), nullable=True)      # Filesystem path or identifier
     media_type = Column(String(20), nullable=True)       # 'image', 'video', or None
     thumbnail_path = Column(String(500), nullable=True)  # Thumbnail/poster path
+    media_width = Column(Integer, nullable=True)         # Custom display width (px)
+    media_height = Column(Integer, nullable=True)        # Custom display height (px)
     is_draft = Column(Boolean, default=False)
     media_data = Column(LargeBinary, nullable=True)      # For DB storage option
     thumbnail_data = Column(LargeBinary, nullable=True)  # Thumbnail binary

@@ -25,6 +25,8 @@ async def create_post(
     db_post = Post(
         title=post_data.title,
         description=post_data.description,
+        media_width=post_data.media_width,
+        media_height=post_data.media_height,
         is_draft=post_data.is_draft,
         media_type=media_type,
         media_path=media_path,
