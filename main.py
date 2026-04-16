@@ -260,6 +260,8 @@ async def get_contact_information(db: AsyncSession = Depends(get_db)):
 
 @app.get("/contact-messages", response_model=List[ContactMessageResponse])
 async def list_contact_messages(
+    page: int = 1,
+    page_size: int = 50,
     current_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
@@ -267,7 +269,7 @@ async def list_contact_messages(
     Get all contact messages for the owner dashboard.
     Owner-only endpoint.
     """
-    messages = await get_contact_messages(db)
+    messages, _total = await get_contact_messages(db, page=page, page_size=page_size)
     return messages
 
 
